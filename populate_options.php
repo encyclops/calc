@@ -43,4 +43,16 @@ if (isset($_POST['action']) && $_POST['action'] === 'oneFT') {
     }
 }
 
+if (isset($_POST['action']) && $_POST['action'] === 'oneRP') {
+    $sql = "SELECT * FROM DCALC_REFPATTERN WHERE RPATT_ID = " . $_POST['RPATT_ID'];
+    $result = executeQuery($sql);
+
+    // Check if query was successful
+    if ($result->num_rows > 0) {
+        echo json_encode($result->fetch_assoc());
+    } else {
+        echo "<option value=''>No options available</option>";
+    }
+}
+
 ?>

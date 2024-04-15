@@ -30,6 +30,7 @@
     <div id="radioContainer">
     </div>
     <button id="calculateBtn" onclick="calculate()" type="button">Calculate</button>
+    <input id="result" style="display: none;" readonly>
 </body>
 <script>
     let rowCounter = 1;
@@ -86,19 +87,65 @@
                 const promises = [];
 
                 selectElements.forEach(select => {
-                    // Push the promise returned by checkValue to the promises array
-                    promises.push(checkValue(select.value));
+                    promises.push(getFoodType(select.value));
                 });
 
                 try {
-                    // Wait for all promises to resolve
                     const results = await Promise.all(promises);
+                    let i = 1;
+                    let totalPro = 0;
+                    let totalLys = 0;
+                    let totalSAA = 0;
+                    let totalThr = 0;
+                    let totalTrp = 0;
 
                     results.forEach(data => {
-                        // Push the promise returned by checkValue to the promises array
-                        console.log(data);
+                        if (!document.getElementById('amountInput' + i)) i++;
+                        const input = parseFloat(document.getElementById('amountInput' + i).value) / 100;
+
+                        const pro = input * data['FTYPE_PROTEIN'];
+                        totalPro += pro;
+                        
+                        const lys = pro * data['FTYPE_COMPLYS'] * data['FTYPE_TRUELYS'];
+                        totalLys += lys;
+
+                        const saa = pro * data['FTYPE_COMPSAA'] * data['FTYPE_TRUESAA'];
+                        totalSAA += saa;
+                        
+                        const thr = pro * data['FTYPE_COMPTHR'] * data['FTYPE_TRUETHR'];
+                        totalThr += thr;
+
+                        const trp = pro * data['FTYPE_COMPTRP'] * data['FTYPE_TRUETRP'];
+                        totalTrp += trp;
+                        i++;
                     });
-                    // Handle the results as needed
+
+                    const aaLys = totalLys / totalPro;
+                    const aaSAA = totalSAA / totalPro;
+                    const aaThr = totalThr / totalPro;
+                    const aaTrp = totalTrp / totalPro;
+
+                    console.log(aaLys, aaSAA, aaThr, aaTrp);
+                    
+                    const refPatternRBtn = document.querySelector('input[type="radio"][name="rPattern"]:checked');
+                    if (refPatternRBtn) {
+                        const data = await getRefPattern(refPatternRBtn.value);
+                        console.log(data);
+
+                        const rRatioLys = aaLys / data['RPATT_LYS'];
+                        const rRatioSAA = aaSAA / data['RPATT_SAA'];
+                        const rRatioThr = aaThr / data['RPATT_THR'];
+                        const rRatioTrp = aaTrp / data['RPATT_TRP'];
+
+                        var lowestRatio = Math.round(Math.min(rRatioLys, rRatioSAA, rRatioThr, rRatioTrp) * 100);
+
+                        if (lowestRatio < 75) lowestRatio += " (buruk)";
+                        else if (lowestRatio < 100) lowestRatio += " (baik)";
+                        else lowestRatio += " (sangat baik)";
+
+                        document.getElementById('result').value = lowestRatio;
+                        document.getElementById('result').style.display = 'block';
+                    }
                 } catch (error) {
                     // Handle any errors that may occur during the promise resolution
                     console.error('Error fetching options:', error);
@@ -141,37 +188,52 @@
         }
     }
 
-    async function checkValue(rowNumber) {
+    async function getFoodType(rowNumber) {
         try {
-            // Prepare the request body with the action parameter
             const requestBody = new FormData();
             requestBody.append('action', 'oneFT');
             requestBody.append('FTYPE_ID', rowNumber);
 
-            // Make a fetch request to populate_options.php with POST method and request body
             const response = await fetch('populate_options.php', {
                 method: 'POST',
                 body: requestBody
             });
 
-            // Check if the response is successful
             if (response.ok) {
-                // Parse the response as text
                 const data = await response.text();
                 const dataArray = JSON.parse(data);
                 return dataArray;
-                // Handle the response data as needed
             } else {
-                // Handle error if the response is not ok
                 console.error('Error:', response.statusText);
             }
         } catch (error) {
-            // Handle any other errors that may occur during the fetch operation
             console.error('Error fetching options:', error);
         }
     }
 
-    // Function to fetch data from the server
+    async function getRefPattern(id) {
+        try {
+            const requestBody = new FormData();
+            requestBody.append('action', 'oneRP');
+            requestBody.append('RPATT_ID', id);
+
+            const response = await fetch('populate_options.php', {
+                method: 'POST',
+                body: requestBody
+            });
+
+            if (response.ok) {
+                const data = await response.text();
+                const dataArray = JSON.parse(data);
+                return dataArray;
+            } else {
+                console.error('Error:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error fetching options:', error);
+        }
+    }
+
     async function fetchData() {
         try {
             // Prepare the request body with the action parameter
