@@ -21,21 +21,29 @@ function connectDB()
 }
 
 // Function to execute a query
-function executeQuery($sql) {
-    $conn = connectDB(); // Connect to the database
+function executeQuery($sql, $params = [])
+{
+    $conn = connectDB();
+    $stmt = $conn->prepare($sql);
 
-    // Execute the query
-    $result = $conn->query($sql);
-
-    // Check if query was successful
-    if ($result === false) {
-        echo "Error executing query: " . $conn->error;
-    } else {
-        return $result;
+    if (!$stmt) {
+        echo "Error preparing statement: " . $conn->error;
+        return false;
     }
 
-    // Close connection (optional, can be omitted as PHP will close it automatically)
+    if (!empty($params)) {
+        $types = str_repeat('s', count($params)); // Assuming all parameters are strings
+        $stmt->bind_param($types, ...$params);
+    }
+
+    $stmt->execute();
+
+    $result = $stmt->get_result();
+
+    $stmt->close();
     $conn->close();
+
+    return $result;
 }
 
 // Function to insert data
@@ -60,7 +68,7 @@ function insertData($tableName, $data)
     }
 }
 
-function updateData($tableName, $data, $id)
+function updateData($tableName, $data, $id, $main)
 {
     $conn = connectDB();
 
@@ -71,7 +79,7 @@ function updateData($tableName, $data, $id)
     // Remove the trailing comma and space
     $setClause = rtrim($setClause, ", ");
 
-    $sql = "UPDATE $tableName SET $setClause WHERE FTYPE_ID = $id";
+    $sql = "UPDATE $tableName SET $setClause WHERE $main = $id";
 
     // Execute the query
     $result = $conn->query($sql);

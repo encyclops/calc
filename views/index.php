@@ -1,6 +1,5 @@
 <?php
 ob_start();
-$base_url = '';
 ?>
 <section class="section">
     <div class="row">

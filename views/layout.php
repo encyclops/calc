@@ -1,5 +1,6 @@
 <?php
-$base_url = "http://localhost/calc/";
+include '../database/populate_options.php';
+if (session_status() == PHP_SESSION_NONE) session_start();
 ?>
 <html>
 
@@ -12,24 +13,24 @@ $base_url = "http://localhost/calc/";
     <meta content="" name="keywords">
 
     <!-- Favicons -->
-    <link href="<?php echo $base_url ?>assets/img/favicon.png" rel="icon">
-    <link href="<?php echo $base_url ?>assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+    <link href="<?php echo $_SESSION['path'] ?>assets/img/favicon.png" rel="icon">
+    <link href="<?php echo $_SESSION['path'] ?>assets/img/apple-touch-icon.png" rel="apple-touch-icon">
 
     <!-- Google Fonts -->
     <link href="https://fonts.gstatic.com" rel="preconnect">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
 
     <!-- Vendor CSS Files -->
-    <link href="<?php echo $base_url ?>assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <link href="<?php echo $base_url ?>assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
-    <link href="<?php echo $base_url ?>assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
-    <link href="<?php echo $base_url ?>assets/vendor/quill/quill.snow.css" rel="stylesheet">
-    <link href="<?php echo $base_url ?>assets/vendor/quill/quill.bubble.css" rel="stylesheet">
-    <link href="<?php echo $base_url ?>assets/vendor/remixicon/remixicon.css" rel="stylesheet">
-    <link href="<?php echo $base_url ?>assets/vendor/simple-datatables/style.css" rel="stylesheet">
+    <link href="<?php echo $_SESSION['path'] ?>assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="<?php echo $_SESSION['path'] ?>assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+    <link href="<?php echo $_SESSION['path'] ?>assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
+    <link href="<?php echo $_SESSION['path'] ?>assets/vendor/quill/quill.snow.css" rel="stylesheet">
+    <link href="<?php echo $_SESSION['path'] ?>assets/vendor/quill/quill.bubble.css" rel="stylesheet">
+    <link href="<?php echo $_SESSION['path'] ?>assets/vendor/remixicon/remixicon.css" rel="stylesheet">
+    <link href="<?php echo $_SESSION['path'] ?>assets/vendor/simple-datatables/style.css" rel="stylesheet">
 
     <!-- Template Main CSS File -->
-    <link href="<?php echo $base_url ?>assets/css/style.css" rel="stylesheet">
+    <link href="<?php echo $_SESSION['path'] ?>assets/css/style.css" rel="stylesheet">
 
     <!-- SweetAlert2 CSS File -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
@@ -44,14 +45,65 @@ $base_url = "http://localhost/calc/";
 </head>
 
 <body>
-    <header id="header" class="header fixed-top d-flex align-items-center">
-        <nav class="header-nav ms-auto">
+    <header id="header" class="header fixed-top d-flex align-items-center justify-content-between">
+        <nav class="header-nav">
             <ul class="d-flex align-items-center">
                 <li class="nav-item">
-                    <a class="nav-link nav-icon search-bar-toggle " href="<?php echo $base_url ?>views/ftypeForm.php">
-                        <i class="bi bi-search"></i>
+                    <?php $target = 'login'; ?>
+                    <a class="nav-link nav-icon search-bar-toggle " href="<?php echo $_SESSION['path']; ?>">
+                        <i class="bi bi-house-fill"></i>
                     </a>
                 </li>
+            </ul>
+        </nav>
+        <nav class="header-nav ms-auto">
+            <ul class="d-flex align-items-center">
+                <?php if (isset($_SESSION['username'])) { ?>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link nav-icon" href="#" data-bs-toggle="dropdown">
+                            <i class="bi bi-stack"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow notifications">
+                            <li class="dropdown-header">
+                                Kelola Master Data
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li class="notification-item">
+                                <a href="<?php echo $_SESSION['path']; ?>ftypeData">
+                                    <div>
+                                        <h4>Data Bahan Makanan</h4>
+                                    </div>
+                                </a>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li class="notification-item">
+                                <a href="<?php echo $_SESSION['path']; ?>userData">
+                                    <div>
+                                        <h4>Data Admin</h4>
+                                    </div>
+                                </a>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-icon search-bar-toggle " href="<?php echo $_SESSION['path']; ?>logout">
+                            <i class="bi bi-box-arrow-right"></i>
+                        </a>
+                    </li>
+                <?php } else { ?>
+                    <li class="nav-item">
+                        <a class="nav-link nav-icon search-bar-toggle " href="<?php echo $_SESSION['path']; ?>login">
+                            <i class="bi bi-box-arrow-in-right"></i>
+                        </a>
+                    </li>
+                <?php } ?>
             </ul>
         </nav>
     </header>
@@ -60,7 +112,7 @@ $base_url = "http://localhost/calc/";
     </main>
 
     <script>
-        const base_url = '<?php echo $base_url ?>';
+        const base_url = '<?php echo $_SESSION['path'] ?>';
         if (document.getElementById("home")) document.getElementById("home").href = base_url;
 
         function switchSection(hide, show) {
@@ -91,6 +143,12 @@ $base_url = "http://localhost/calc/";
             'FTYPE_TRUEVAL',
             'FTYPE_TRUEHIS',
         ];
+
+        const userAttributes = [
+            'USER_NAME',
+            'USER_USERNAME',
+            'USER_PASSWORD',
+        ];
     </script>
 
     <!-- Data Fetching -->
@@ -100,7 +158,7 @@ $base_url = "http://localhost/calc/";
                 const requestBody = new FormData();
                 requestBody.append('action', code);
 
-                const response = await fetch('<?php echo $base_url ?>database/populate_options.php', {
+                const response = await fetch('<?php echo $_SESSION['path'] ?>database/populate_options.php', {
                     method: 'POST',
                     body: requestBody
                 });
@@ -136,6 +194,64 @@ $base_url = "http://localhost/calc/";
                     return item.RPATT_ID === id;
                 });
                 return foundObject;
+            } catch (error) {
+                console.error('Error fetching options:', error);
+            }
+        }
+
+        async function getOneUser(id) {
+            try {
+                const dataArray = await fetchData('allUser');
+                var foundObject = dataArray.find(function(item) {
+                    return item.USER_ID === id;
+                });
+                return foundObject;
+            } catch (error) {
+                console.error('Error fetching options:', error);
+            }
+        }
+    </script>
+
+    <!-- Login Page -->
+    <script>
+        function login() {
+            try {
+                var form = document.getElementById("loginForm");
+                var formData = new FormData(form);
+
+                fetch('<?php echo $_SESSION['path'] ?>database/populate_options.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            Swal.fire({
+                                    icon: 'success',
+                                    title: 'Data Authorized',
+                                    text: 'Welcome!',
+                                    confirmButtonText: 'OK'
+                                })
+                                .then((result) => {
+                                    window.location.href = '<?php echo $_SESSION['path'] ?>' + 'ftypeData';
+                                });
+                        } else if (response.status === 401) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Data Unauthorized',
+                                text: 'Incorrect username or password. Please try again.',
+                                confirmButtonText: 'OK'
+                            });
+                            form.reset();
+                        } else {
+                            throw new Error('Network response was not ok.');
+                        }
+                    })
+                    .then(data => {
+                        console.log(data);
+                    })
+                    .catch(error => {
+                        console.error('There was a problem with the fetch operation:', error);
+                    });
             } catch (error) {
                 console.error('Error fetching options:', error);
             }
@@ -328,6 +444,21 @@ $base_url = "http://localhost/calc/";
                             updateDataFtype(value);
                         });
                     } else if (key != 'FTYPE_STATUS') cell.textContent = value;
+                    else {
+                        var button = document.createElement("button");
+                        button.setAttribute("type", "button");
+                        button.setAttribute("class", "btn btn-danger");
+
+                        var icon = document.createElement("i");
+                        icon.setAttribute("class", "bi bi-trash");
+
+                        button.appendChild(icon);
+                        button.onclick = function() {
+                            deleteDataFtype(rowData['FTYPE_ID']);
+                        };
+
+                        cell.appendChild(button);
+                    }
                     row.appendChild(cell);
                 });
 
@@ -339,6 +470,7 @@ $base_url = "http://localhost/calc/";
         function addDataFtype() {
             const form = document.getElementById('ftypeForm');
             form.reset();
+            document.getElementById('FTYPE_ID').value = null;
             document.getElementById('pageTitleFtype').textContent = document.getElementById('pageDescFtype').textContent = 'Tambah Data Bahan Makanan';
             switchSection('ftypeMainSection', 'ftypeFormSection');
         }
@@ -355,6 +487,64 @@ $base_url = "http://localhost/calc/";
             document.getElementById('pageTitleFtype').textContent = document.getElementById('pageDescFtype').textContent = 'Ubah Data Bahan Makanan';
             document.getElementById('FTYPE_ID').value = data['FTYPE_ID'];
             switchSection('ftypeMainSection', 'ftypeFormSection');
+        }
+
+        async function deleteDataFtype(id) {
+            event.stopPropagation();
+            const confirmResult = await Swal.fire({
+                icon: 'warning',
+                title: 'Are you sure?',
+                text: 'You are about to delete this item!',
+                showCancelButton: true,
+                confirmButtonText: 'OK',
+                cancelButtonText: 'Cancel'
+            });
+
+            if (confirmResult.isConfirmed) {
+                const data = {};
+                data['FTYPE_STATUS'] = 0;
+
+                try {
+                    const requestBody = new FormData();
+                    requestBody.append('data', JSON.stringify(data));
+                    requestBody.append('action', 'updateFtype');
+                    requestBody.append('id', id);
+
+                    console.log(id);
+
+                    const response = await fetch(base_url + 'database/populate_options.php', {
+                        method: 'POST',
+                        body: requestBody
+                    });
+
+                    if (response.ok) {
+                        const responseData = await response.text();
+                        await Swal.fire({
+                            icon: 'success',
+                            title: 'Data Updated',
+                            text: responseData,
+                            confirmButtonText: 'OK'
+                        });
+                        window.location.reload();
+                    } else {
+                        console.error('Error:', response.statusText);
+                        await Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'An error occurred while updating data',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error fetching options:', error);
+                    await Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred while updating data',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            }
         }
 
         async function validateForm() {
@@ -419,19 +609,205 @@ $base_url = "http://localhost/calc/";
         }
     </script>
 
+    <!-- User CRUD -->
+    <script>
+        <?php if ($page == 'user') { ?>
+            populateUserTable();
+        <?php } ?>
+
+        async function populateUserTable() {
+            const dataArray = await fetchData('allUser');
+            var tbody = document.getElementById('userMainTBody');
+            var counter = 1;
+            dataArray.forEach(function(rowData) {
+                var row = document.createElement('tr');
+                row.style.cursor = 'pointer';
+
+                Object.entries(rowData).forEach(function([key, value]) {
+                    var cell = document.createElement('td');
+                    if (key == 'USER_ID') {
+                        cell.textContent = counter;
+                        row.addEventListener('click', function() {
+                            updateDataUser(value);
+                        });
+                        row.appendChild(cell);
+                    } else if (key == 'USER_NAME') {
+                        cell.textContent = value;
+                        row.appendChild(cell);
+                    } else if (key == 'USER_PASSWORD') {
+                        var button = document.createElement("button");
+                        button.setAttribute("type", "button");
+                        button.setAttribute("class", "btn btn-danger");
+
+                        var icon = document.createElement("i");
+                        icon.setAttribute("class", "bi bi-trash");
+
+                        button.appendChild(icon);
+                        button.onclick = function() {
+                            deleteDataUser(rowData['USER_ID']);
+                        };
+
+                        cell.appendChild(button);
+                        row.appendChild(cell);
+                    }
+                });
+
+                counter++;
+                tbody.appendChild(row);
+            });
+        }
+
+        function addDataUser() {
+            const form = document.getElementById('userForm');
+            form.reset();
+            document.getElementById('USER_ID').value = null;
+            document.getElementById('pageTitleUser').textContent = document.getElementById('pageDescUser').textContent = 'Tambah Data Admin';
+            switchSection('userMainSection', 'userFormSection');
+        }
+
+        async function updateDataUser(id) {
+            const data = await getOneUser(id);
+            userAttributes.forEach(attribute => {
+                const value = data[attribute];
+                if (value !== undefined && document.getElementById(attribute) !== null) {
+                    document.getElementById(attribute).value = value;
+                    console.log(attribute, value);
+                }
+            });
+            document.getElementById('pageTitleUser').textContent = document.getElementById('pageDescUser').textContent = 'Ubah Data Admin';
+            document.getElementById('USER_ID').value = data['USER_ID'];
+            switchSection('userMainSection', 'userFormSection');
+        }
+
+        async function deleteDataUser(id) {
+            event.stopPropagation();
+            const confirmResult = await Swal.fire({
+                icon: 'warning',
+                title: 'Are you sure?',
+                text: 'You are about to delete this item!',
+                showCancelButton: true,
+                confirmButtonText: 'OK',
+                cancelButtonText: 'Cancel'
+            });
+
+            if (confirmResult.isConfirmed) {
+                try {
+                    const requestBody = new FormData();
+                    requestBody.append('action', 'deleteUser');
+                    requestBody.append('id', id);
+
+                    console.log(id);
+
+                    const response = await fetch(base_url + 'database/populate_options.php', {
+                        method: 'POST',
+                        body: requestBody
+                    });
+
+                    if (response.ok) {
+                        const responseData = await response.text();
+                        await Swal.fire({
+                            icon: 'success',
+                            title: 'Data Updated',
+                            text: responseData,
+                            confirmButtonText: 'OK'
+                        });
+                        window.location.reload();
+                    } else {
+                        console.error('Error:', response.statusText);
+                        await Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'An error occurred while updating data',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error fetching options:', error);
+                    await Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred while updating data',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            }
+        }
+
+        async function validateForm() {
+            const form = document.getElementById('userForm');
+            event.preventDefault();
+            const id = document.getElementById('USER_ID').value;
+            console.log(id);
+
+            if (form.checkValidity()) {
+                const data = {};
+
+                userAttributes.forEach(fieldName => {
+                    const element = document.getElementById(fieldName);
+                    if (element) {
+                        data[fieldName] = element.value;
+                    }
+                });
+
+                try {
+                    const requestBody = new FormData();
+                    requestBody.append('data', JSON.stringify(data));
+                    if (id != '') {
+                        requestBody.append('action', 'updateUser');
+                        requestBody.append('id', id);
+                    } else {
+                        requestBody.append('action', 'insertUser');
+                    }
+
+                    const response = await fetch(base_url + 'database/populate_options.php', {
+                        method: 'POST',
+                        body: requestBody
+                    });
+
+                    if (response.ok) {
+                        const data = await response.text();
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Data Updated',
+                            text: data,
+                            confirmButtonText: 'OK'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.reload();
+                            }
+                        });
+                    } else {
+                        console.error('Error:', response.statusText);
+                    }
+                } catch (error) {
+                    console.error('Error fetching options:', error);
+                }
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Form Invalid',
+                    text: 'Please fill all the blank space!',
+                    confirmButtonText: 'OK'
+                });
+            }
+        }
+    </script>
+
     <!-- Vendor JS Files -->
-    <script src="<?php echo $base_url ?>assets/vendor/apexcharts/apexcharts.min.js"></script>
-    <script src="<?php echo $base_url ?>assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="<?php echo $base_url ?>assets/vendor/chart.js/chart.umd.js"></script>
-    <script src="<?php echo $base_url ?>assets/vendor/echarts/echarts.min.js"></script>
-    <script src="<?php echo $base_url ?>assets/vendor/quill/quill.min.js"></script>
-    <script src="<?php echo $base_url ?>assets/vendor/simple-datatables/simple-datatables.js"></script>
-    <script src="<?php echo $base_url ?>assets/vendor/tinymce/tinymce.min.js"></script>
-    <script src="<?php echo $base_url ?>assets/vendor/php-email-form/validate.js"></script>
+    <script src="<?php echo $_SESSION['path'] ?>assets/vendor/apexcharts/apexcharts.min.js"></script>
+    <script src="<?php echo $_SESSION['path'] ?>assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="<?php echo $_SESSION['path'] ?>assets/vendor/chart.js/chart.umd.js"></script>
+    <script src="<?php echo $_SESSION['path'] ?>assets/vendor/echarts/echarts.min.js"></script>
+    <script src="<?php echo $_SESSION['path'] ?>assets/vendor/quill/quill.min.js"></script>
+    <script src="<?php echo $_SESSION['path'] ?>assets/vendor/simple-datatables/simple-datatables.js"></script>
+    <script src="<?php echo $_SESSION['path'] ?>assets/vendor/tinymce/tinymce.min.js"></script>
+    <script src="<?php echo $_SESSION['path'] ?>assets/vendor/php-email-form/validate.js"></script>
 
     <!-- Template Main JS File -->
-    <script src="<?php echo $base_url ?>assets/js/main.js"></script>
+    <script src="<?php echo $_SESSION['path'] ?>assets/js/main.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 
 </html>
+<?php
+?>
